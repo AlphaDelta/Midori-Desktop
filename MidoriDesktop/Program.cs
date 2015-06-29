@@ -16,18 +16,32 @@ namespace MidoriDesktop
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                //Application.Run();
+
+                Settings settings = null;
+                EventHandler evt = new EventHandler(delegate(object sender, EventArgs e)
+                {
+                    if (settings != null && !settings.IsDisposed)
+                    {
+                        if (settings.WindowState == FormWindowState.Minimized) settings.WindowState = FormWindowState.Normal;
+                        settings.BringToFront();
+                        settings.Focus();
+                    }
+                    else
+                    {
+                        settings = new Settings();
+                        settings.Show();
+                    }
+                });
+
                 ico.Text = "Midori";
                 ico.Icon = Properties.Resources.icon;
+                ico.DoubleClick += evt;
 
                 ContextMenu cm = new ContextMenu();
 
                 MenuItem i1 = new MenuItem("Settings");
                 i1.DefaultItem = true;
-                i1.Click +=
-                delegate {
-                    throw new Exception("Test exception");
-                };
+                i1.Click += evt;
                 cm.MenuItems.Add(i1);
 
                 cm.MenuItems.Add(new MenuItem("-"));
