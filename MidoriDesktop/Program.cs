@@ -11,30 +11,48 @@ namespace MidoriDesktop
         [STAThread]
         static void Main()
         {
-            //Application.EnableVisualStyles();
-            //Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run();
             NotifyIcon ico = new NotifyIcon();
-            ico.Text = "Midori";
-            ico.Icon = Properties.Resources.icon;
+            try
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                //Application.Run();
+                ico.Text = "Midori";
+                ico.Icon = Properties.Resources.icon;
 
-            ContextMenu cm = new ContextMenu();
+                ContextMenu cm = new ContextMenu();
 
-            MenuItem i1 = new MenuItem("Exit...");
-            i1.DefaultItem = true;
-            i1.Click += delegate { closing = true; };
-            cm.MenuItems.Add(i1);
+                MenuItem i1 = new MenuItem("Settings");
+                i1.DefaultItem = true;
+                i1.Click +=
+                delegate {
+                    throw new Exception("Test exception");
+                };
+                cm.MenuItems.Add(i1);
 
-            ico.ContextMenu = cm;
+                cm.MenuItems.Add(new MenuItem("-"));
 
-            ico.Visible = true;
+                MenuItem i2 = new MenuItem("Exit");
+                i2.Click += delegate { closing = true; };
+                cm.MenuItems.Add(i2);
 
-            ico.ShowBalloonTip(3, "Info", "Midori's running now!", ToolTipIcon.Info);
+                ico.ContextMenu = cm;
 
-            while (!closing) Application.DoEvents();
+                ico.Visible = true;
 
-            ico.Visible = false;
-            ico.Dispose();
+                ico.ShowBalloonTip(3, "Info", "Midori's running now!", ToolTipIcon.Info);
+
+                while (!closing) Application.DoEvents();
+            }
+            catch (Exception e)
+            {
+                Error error = new Error(e.Message);
+            }
+            finally
+            {
+                ico.Visible = false;
+                ico.Dispose();
+            }
         }
     }
 }
