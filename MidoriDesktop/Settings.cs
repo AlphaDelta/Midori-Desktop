@@ -1,74 +1,94 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+using System.IO;
 using System.Text;
-using System.Windows.Forms;
-using Gma.UserActivityMonitor;
 
 namespace MidoriDesktop
 {
-    public partial class Settings : Form
+    class Settings
     {
-        public Settings()
-        {
-            InitializeComponent();
-        }
+        public static bool
+        HotkeyImageCtrl = false,
+        HotkeyImageAlt = false,
+        HotkeyImageShift = false,
 
-        bool ctrl = false, alt = false, shift = false;
-        void KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Control || e.KeyCode == Keys.ControlKey || e.KeyCode == Keys.LControlKey || e.KeyCode == Keys.RControlKey) ctrl = true;
-            else if (e.KeyCode == Keys.Alt) alt = true;
-            else if (e.KeyCode == Keys.Shift || e.KeyCode == Keys.ShiftKey || e.KeyCode == Keys.LShiftKey || e.KeyCode == Keys.RShiftKey) shift = true;
-            else if (imagefocus) txtHotkeyImage.Text = (ctrl ? "Ctrl + " : "") + (alt ? "Alt + " : "") + (shift ? "Shift + " : "") + e.KeyCode.ToString();
-            else if (videofocus) txtHotkeyVideo.Text = (ctrl ? "Ctrl + " : "") + (alt ? "Alt + " : "") + (shift ? "Shift + " : "") + e.KeyCode.ToString();
-        }
+        HotkeyVideoCtrl = false,
+        HotkeyVideoAlt = false,
+        HotkeyVideoShift = false;
 
-        void KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Control || e.KeyCode == Keys.ControlKey || e.KeyCode == Keys.LControlKey || e.KeyCode == Keys.RControlKey) ctrl = false;
-            else if (e.KeyCode == Keys.Alt) alt = false;
-            else if (e.KeyCode == Keys.Shift || e.KeyCode == Keys.ShiftKey || e.KeyCode == Keys.LShiftKey || e.KeyCode == Keys.RShiftKey) shift = false;
-        }
+        public static int HotkeyImage, HotkeyVideo;
 
-        void HookKeyboard(bool flag)
+        static string file;
+        public static void Initialize()
         {
-            if (flag)
+            string folder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Midori\";
+            file = folder + "settings";
+
+            if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+            if (!File.Exists(file))
             {
-                HookManager.KeyDown += KeyDown;
-                HookManager.KeyUp += KeyUp;
+                FileStream stream = File.Create(file);
 
-                this.ControlBox = false;
+                byte[] buffer = Encoding.ASCII.GetBytes("HotkeyImage=1:0:1:67\nHotkeyVideo=1:0:1:86");
+                stream.Write(buffer, 0, buffer.Length);
+                stream.Close();
+                stream.Dispose();
+
+                HotkeyImageCtrl = HotkeyImageShift = HotkeyVideoCtrl = HotkeyVideoShift = true;
+                HotkeyImage = 67;
+                HotkeyVideo = 86;
             }
             else
             {
-                HookManager.KeyDown -= KeyDown;
-                HookManager.KeyUp -= KeyUp;
+                string[] lines = File.ReadAllLines(file);
+                foreach (string line in lines)
+                {
+                    string[] spl = line.Split('=');
 
-                this.ControlBox = true;
+                    switch (spl[0])
+                    {
+                        case "HotkeyImage":
+                            string[] spl2 = spl[1].Split(':');
+                            if (spl2.Length != 4) break;
+
+                            HotkeyImageCtrl = (spl2[0] == "1");
+                            HotkeyImageAlt = (spl2[1] == "1");
+                            HotkeyImageShift = (spl2[2] == "1");
+                            HotkeyImage = Int32.Parse(spl2[3]);
+                            break;
+                        case "HotkeyVideo":
+                            string[] spl2v = spl[1].Split(':');
+                            if (spl2v.Length != 4) break;
+
+                            HotkeyVideoCtrl = (spl2v[0] == "1");
+                            HotkeyVideoAlt = (spl2v[1] == "1");
+                            HotkeyVideoShift = (spl2v[2] == "1");
+                            HotkeyVideo = Int32.Parse(spl2v[3]);
+                            break;
+                    }
+                }
             }
         }
 
-        bool imagefocus = false;
-        private void btnHotkeyImage_Click(object sender, EventArgs e)
+        public static void Save()
         {
-            btnHotkeyVideo.Enabled = imagefocus;
+            FileStream stream = (File.Exists(file) ? File.OpenWrite(file) : File.Create(file));
 
-            imagefocus = !imagefocus;
+            byte[] buffer = Encoding.ASCII.GetBytes(
+                String.Format("HotkeyImage={0}:{1}:{2}:{3}\nHotkeyVideo={4}:{5}:{6}:{7}",
+                (HotkeyImageCtrl ? 1 : 0),
+                (HotkeyImageAlt ? 1 : 0),
+                (HotkeyImageShift ? 1 : 0),
+                HotkeyImage,
+                (HotkeyVideoCtrl ? 1 : 0),
+                (HotkeyVideoAlt ? 1 : 0),
+                (HotkeyVideoShift ? 1 : 0),
+                HotkeyVideo)
+            );
+            stream.Write(buffer, 0, buffer.Length);
 
-            HookKeyboard(imagefocus);
-        }
-
-        bool videofocus = false;
-        private void btnHotkeyVideo_Click(object sender, EventArgs e)
-        {
-            btnHotkeyImage.Enabled = videofocus;
-
-            videofocus = !videofocus;
-
-            HookKeyboard(videofocus);
+            stream.Close();
+            stream.Dispose();
         }
     }
 }

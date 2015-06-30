@@ -17,7 +17,9 @@ namespace MidoriDesktop
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
-                Settings settings = null;
+                Settings.Initialize();
+
+                SettingsForm settings = null;
                 EventHandler evt = new EventHandler(delegate(object sender, EventArgs e)
                 {
                     if (settings != null && !settings.IsDisposed)
@@ -28,7 +30,7 @@ namespace MidoriDesktop
                     }
                     else
                     {
-                        settings = new Settings();
+                        settings = new SettingsForm();
                         settings.Show();
                     }
                 });
