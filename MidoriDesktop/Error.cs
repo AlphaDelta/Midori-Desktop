@@ -28,11 +28,11 @@ namespace MidoriDesktop
             "The jews are to blame for this!"
         };
 
-        public Error(string error, bool rand = true)
+        public Error(Exception error, bool rand = true)
         {
             InitializeComponent();
 
-            txtError.Text = error;
+            txtError.Text = error.ToString();
 
             if (rand)
             {

@@ -10,8 +10,13 @@ namespace MidoriDesktop
 {
     public partial class ClickCapture : Form
     {
-        public ClickCapture()
+        Overlay overlay;
+        public int X, Y, W, H;
+        int L, T, R, B;
+        public ClickCapture(Overlay overlay)
         {
+            this.overlay = overlay;
+
             InitializeComponent();
 
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
@@ -28,10 +33,44 @@ namespace MidoriDesktop
                 if (scr.Bounds.Height > height) height = scr.Bounds.Height;
             }
 
-            this.Size = new Size(width, height);
+            overlay.Size = this.Size = new Size(width, height);
+            overlay.W = width;
+            overlay.H = height;
+            overlay.SetSize(width, height);
 
             this.Cursor = Cursors.Cross;
-            this.MouseDown += delegate { this.Close(); };
+
+            bool dragging = false;
+            this.MouseDown += (object sender, MouseEventArgs e) =>
+            {
+                dragging = true;
+
+                this.L = e.X;
+                this.T = e.Y;
+                this.R = e.X;
+                this.B = e.Y;
+
+                overlay.L = e.X;
+                overlay.T = e.Y;
+                overlay.R = e.X;
+                overlay.B = e.Y;
+
+                overlay.Update();
+                overlay.Show();
+            };
+            this.MouseMove += (object sender, MouseEventArgs e) =>
+            {
+                if (!dragging) return;
+
+                this.R = e.X;
+                this.B = e.Y;
+
+                overlay.R = e.X;
+                overlay.B = e.Y;
+
+                overlay.Update();
+            };
+            this.MouseUp += delegate { this.Close(); };
         }
 
         protected override void OnPaint(PaintEventArgs e)

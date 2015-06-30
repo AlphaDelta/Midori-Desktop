@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
 using Gma.UserActivityMonitor;
@@ -60,12 +61,12 @@ namespace MidoriDesktop
                 HookManager.KeyDown += KeyDown;
                 HookManager.KeyUp += KeyUp;
                 ico.ShowBalloonTip(3, "Info", "Midori's running now!", ToolTipIcon.Info);
-
+                
                 while (!closing) Application.DoEvents();
             }
             catch (Exception e)
             {
-                Error error = new Error(e.Message);
+                Error error = new Error(e);
             }
             finally
             {
@@ -77,7 +78,7 @@ namespace MidoriDesktop
             }
         }
 
-        static bool ctrl = false, alt = false, shift = false;
+        static bool ctrl = false, alt = false, shift = false, incapture = false;
         static void KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Control || e.KeyCode == Keys.ControlKey || e.KeyCode == Keys.LControlKey || e.KeyCode == Keys.RControlKey) ctrl = true;
@@ -85,11 +86,19 @@ namespace MidoriDesktop
             else if (e.KeyCode == Keys.Shift || e.KeyCode == Keys.ShiftKey || e.KeyCode == Keys.LShiftKey || e.KeyCode == Keys.RShiftKey) shift = true;
             else if (e.KeyValue == Settings.HotkeyImage && ctrl == Settings.HotkeyImageCtrl && alt == Settings.HotkeyImageAlt && shift == Settings.HotkeyImageShift)
             {
-                ClickCapture cap = new ClickCapture();
-                cap.Show();
+                if (incapture) return;
+                Async.StartAsync(delegate
+                {
+                    incapture = true;
+                    Overlay overlay = new Overlay();
+                    ClickCapture cap = new ClickCapture(overlay);
+                    cap.ShowDialog();
+                    incapture = false;
+                });
             }
             else if (e.KeyValue == Settings.HotkeyVideo && ctrl == Settings.HotkeyImageCtrl && alt == Settings.HotkeyImageAlt && shift == Settings.HotkeyImageShift)
             {
+                if (incapture) return;
                 ico.ShowBalloonTip(3, "Info", "Video capture invoked!", ToolTipIcon.Info);
             }
         }
