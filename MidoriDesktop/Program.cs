@@ -11,6 +11,7 @@ namespace MidoriDesktop
     static class Program
     {
         static NotifyIcon ico;
+        static SynchronizationContext STAThread;
         public static volatile bool closing = false;
         [STAThread]
         static void Main()
@@ -64,6 +65,8 @@ namespace MidoriDesktop
                 ico.ShowBalloonTip(3, "Info", "Midori's running now!", ToolTipIcon.Info);
 
                 ThreadChoke choke = new ThreadChoke();
+                STAThread = SynchronizationContext.Current;
+                choke.Dispose();
 
                 Async.StartAsync(delegate
                 {
@@ -71,7 +74,7 @@ namespace MidoriDesktop
                     {
                         if (intermediateimgflag)
                         {
-                            choke.Invoke((Action)delegate { Clipboard.SetImage(intermediateimg); });
+                            STAThread.Send(delegate { Clipboard.SetImage(intermediateimg); }, null);
                             intermediateimg.Dispose();
                             intermediateimgflag = false;
                         }
@@ -79,11 +82,11 @@ namespace MidoriDesktop
                         Thread.Sleep(100);
                     }
 
-                    choke.Invoke((Action)delegate { choke.Close(); });
+                    Application.Exit();
                     //choke.Dispose();
                 });
 
-                Application.Run(choke);
+                Application.Run();
                 /*while (!closing)
                 {
                     Application.DoEvents();
