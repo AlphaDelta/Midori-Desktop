@@ -14,7 +14,7 @@ namespace MidoriDesktop
             bg.RunWorkerCompleted += delegate { bg.Dispose(); };
             bg.RunWorkerAsync();
         }
-
-        public delegate void Action();
     }
+
+    public delegate void Action();
 }

@@ -63,7 +63,28 @@ namespace MidoriDesktop
                 HookManager.KeyUp += KeyUp;
                 ico.ShowBalloonTip(3, "Info", "Midori's running now!", ToolTipIcon.Info);
 
-                while (!closing)
+                ThreadChoke choke = new ThreadChoke();
+
+                Async.StartAsync(delegate
+                {
+                    while (!closing)
+                    {
+                        if (intermediateimgflag)
+                        {
+                            choke.Invoke((Action)delegate { Clipboard.SetImage(intermediateimg); });
+                            intermediateimg.Dispose();
+                            intermediateimgflag = false;
+                        }
+
+                        Thread.Sleep(100);
+                    }
+
+                    choke.Invoke((Action)delegate { choke.Close(); });
+                    //choke.Dispose();
+                });
+
+                Application.Run(choke);
+                /*while (!closing)
                 {
                     Application.DoEvents();
 
@@ -75,7 +96,7 @@ namespace MidoriDesktop
                     }
 
                     Thread.Sleep(50);
-                }
+                }*/
             }
             catch (Exception e)
             {
