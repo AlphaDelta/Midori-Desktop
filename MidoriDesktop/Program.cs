@@ -137,11 +137,14 @@ namespace MidoriDesktop
                     overlay.Close();
                     overlay.Dispose();
 
-                    //MessageBox.Show(cap.X + ":" + cap.Y + ":" + cap.W + "x" + cap.H);
-                    Bitmap img = new Bitmap(cap.W, cap.H);
-                    using (Graphics g = Graphics.FromImage(img)) g.CopyFromScreen(cap.X, cap.Y, 0, 0, img.Size, CopyPixelOperation.SourceCopy);
-                    intermediateimg = img;
-                    intermediateimgflag = true;
+                    if (cap.W > 0 && cap.H > 0)
+                    {
+                        //MessageBox.Show(cap.X + ":" + cap.Y + ":" + cap.W + "x" + cap.H);
+                        Bitmap img = new Bitmap(cap.W, cap.H);
+                        using (Graphics g = Graphics.FromImage(img)) g.CopyFromScreen(cap.X, cap.Y, 0, 0, img.Size, CopyPixelOperation.SourceCopy);
+                        intermediateimg = img;
+                        intermediateimgflag = true;
+                    }
 
                     incapture = false;
                 });

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace MidoriDesktop
@@ -66,7 +67,16 @@ namespace MidoriDesktop
                 if (!active) return;
                 if (!dragging) return;
 
-                this.R = e.X;
+                bool flag = false;
+                foreach(Screen scr in Screen.AllScreens)
+                    if (e.X > scr.Bounds.Right - 8 && e.X < scr.Bounds.Right + 8)
+                    {
+                        this.R = scr.Bounds.Right;
+                        flag = true;
+                        break;
+                    }
+                
+                if(!flag) this.R = e.X;
                 this.B = e.Y;
 
                 if (this.R < this.L)
