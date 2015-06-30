@@ -43,6 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClickCapture.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ClickCapture.Designer.cs">
+      <DependentUpon>ClickCapture.cs</DependentUpon>
+    </Compile>
     <Compile Include="Error.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -35,7 +35,7 @@ namespace MidoriDesktop
                 tmpimgctrl = ctrl;
                 tmpimgalt = alt;
                 tmpimgshift = shift;
-                tmpimg = (int)e.KeyCode;
+                tmpimg = e.KeyValue;
             }
             else if (videofocus)
             {
@@ -44,7 +44,7 @@ namespace MidoriDesktop
                 tmpvidctrl = ctrl;
                 tmpvidalt = alt;
                 tmpvidshift = shift;
-                tmpvid = (int)e.KeyCode;
+                tmpvid = e.KeyValue;
             }
         }
 
