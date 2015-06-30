@@ -65,8 +65,26 @@ namespace MidoriDesktop
                 this.R = e.X;
                 this.B = e.Y;
 
-                overlay.R = e.X;
-                overlay.B = e.Y;
+                if (this.R < this.L)
+                {
+                    overlay.L = this.R;
+                    overlay.R = this.L;
+                }
+                else
+                {
+                    overlay.L = this.L;
+                    overlay.R = this.R;
+                }
+                if (this.B < this.T)
+                {
+                    overlay.T = this.B;
+                    overlay.B = this.T;
+                }
+                else
+                {
+                    overlay.T = this.T;
+                    overlay.B = this.B;
+                }
 
                 overlay.Update();
             };

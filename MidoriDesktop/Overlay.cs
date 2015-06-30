@@ -104,8 +104,12 @@ namespace MidoriDesktop
         }
 
         public int L, T, R, B, W, H;
-        Brush fill = new SolidBrush(Color.FromArgb(0x88, 0x00, 0x00, 0x00));
+        Brush fill = new SolidBrush(Color.FromArgb(0x66, 0x00, 0x00, 0x00));
         Brush filltransparent = new SolidBrush(Color.Transparent);
+        Font font = new Font("Microsoft Sans Serif", 8.25f, FontStyle.Regular);
+        Color text = Color.FromArgb(0xFF, 0x33, 0x33, 0x33);
+        Brush btext = new SolidBrush(Color.FromArgb(0xFF, 0x33, 0x33, 0x33));
+        Pen border = new Pen(Color.FromArgb(0xFF, 0x33, 0x33, 0x33));
         Bitmap bitmap;
         public void SetSize(int Width, int Height) { bitmap = new Bitmap(Width, Height, PixelFormat.Format32bppArgb); }
         new public void Update()
@@ -116,6 +120,11 @@ namespace MidoriDesktop
                 g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
                 g.FillRectangle(fill, 0, 0, W, H);
                 g.FillRectangle(filltransparent, L, T, R - L, B - T);
+                g.DrawRectangle(border, L, T, R - L, B - T);
+
+                g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                TextRenderer.DrawText(g, (R - L) + "x" + (B - T), font, new Point(L, B + 5), text);
             }
 
             IntPtr screenDc = WinAPI.GetDC(IntPtr.Zero);
