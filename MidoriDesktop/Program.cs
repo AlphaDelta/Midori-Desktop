@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 using Gma.UserActivityMonitor;
@@ -61,8 +62,20 @@ namespace MidoriDesktop
                 HookManager.KeyDown += KeyDown;
                 HookManager.KeyUp += KeyUp;
                 ico.ShowBalloonTip(3, "Info", "Midori's running now!", ToolTipIcon.Info);
-                
-                while (!closing) Application.DoEvents();
+
+                while (!closing)
+                {
+                    Application.DoEvents();
+
+                    if (intermediateimgflag)
+                    {
+                        Clipboard.SetImage(intermediateimg);
+                        intermediateimg.Dispose();
+                        intermediateimgflag = false;
+                    }
+
+                    Thread.Sleep(50);
+                }
             }
             catch (Exception e)
             {
@@ -79,6 +92,9 @@ namespace MidoriDesktop
         }
 
         static bool ctrl = false, alt = false, shift = false, incapture = false;
+
+        static Image intermediateimg = null; //For clipboard operations
+        static bool intermediateimgflag = false;
         static void KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Control || e.KeyCode == Keys.ControlKey || e.KeyCode == Keys.LControlKey || e.KeyCode == Keys.RControlKey) ctrl = true;
@@ -93,6 +109,16 @@ namespace MidoriDesktop
                     Overlay overlay = new Overlay();
                     ClickCapture cap = new ClickCapture(overlay);
                     cap.ShowDialog();
+                    cap.Dispose();
+                    overlay.Close();
+                    overlay.Dispose();
+
+                    //MessageBox.Show(cap.X + ":" + cap.Y + ":" + cap.W + "x" + cap.H);
+                    Bitmap img = new Bitmap(cap.W, cap.H);
+                    using (Graphics g = Graphics.FromImage(img)) g.CopyFromScreen(cap.X, cap.Y, 0, 0, img.Size, CopyPixelOperation.SourceCopy);
+                    intermediateimg = img;
+                    intermediateimgflag = true;
+
                     incapture = false;
                 });
             }

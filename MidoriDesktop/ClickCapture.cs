@@ -41,8 +41,11 @@ namespace MidoriDesktop
             this.Cursor = Cursors.Cross;
 
             bool dragging = false;
+            bool active = true;
             this.MouseDown += (object sender, MouseEventArgs e) =>
             {
+                if (!active) return;
+
                 dragging = true;
 
                 this.L = e.X;
@@ -60,6 +63,7 @@ namespace MidoriDesktop
             };
             this.MouseMove += (object sender, MouseEventArgs e) =>
             {
+                if (!active) return;
                 if (!dragging) return;
 
                 this.R = e.X;
@@ -88,7 +92,18 @@ namespace MidoriDesktop
 
                 overlay.Update();
             };
-            this.MouseUp += delegate { this.Close(); };
+            this.MouseUp += delegate
+            {
+                dragging = false;
+                active = false;
+
+                this.X = (this.R < this.L ? this.R : this.L);
+                this.Y = (this.B < this.T ? this.B : this.T);
+                this.W = (this.R < this.L ? this.L - this.R : this.R - this.L);
+                this.H = (this.B < this.T ? this.T - this.B : this.B - this.T);
+
+                this.Close();
+            };
         }
 
         protected override void OnPaint(PaintEventArgs e)

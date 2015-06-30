@@ -123,8 +123,14 @@ namespace MidoriDesktop
                 g.DrawRectangle(border, L, T, R - L, B - T);
 
                 g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+                //g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                TextRenderer.DrawText(g, (R - L) + "x" + (B - T), font, new Point(L, B + 5), text);
+                string txt = (R - L) + "x" + (B - T);
+                TextRenderer.DrawText(g, txt, font, new Point(L - 1, B + 5), Color.Black);
+                TextRenderer.DrawText(g, txt, font, new Point(L + 1, B + 5), Color.Black);
+                TextRenderer.DrawText(g, txt, font, new Point(L, B + 6), Color.Black);
+                TextRenderer.DrawText(g, txt, font, new Point(L, B + 4), Color.Black);
+                TextRenderer.DrawText(g, txt, font, new Point(L, B + 5), Color.White);
             }
 
             IntPtr screenDc = WinAPI.GetDC(IntPtr.Zero);
