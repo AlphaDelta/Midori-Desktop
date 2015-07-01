@@ -119,6 +119,7 @@ namespace MidoriDesktop
 
         static Image intermediateimg = null; //For clipboard operations
         static bool intermediateimgflag = false;
+        static ClickCapture tmpcap = null;
         static void KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Control || e.KeyCode == Keys.ControlKey || e.KeyCode == Keys.LControlKey || e.KeyCode == Keys.RControlKey) ctrl = true;
@@ -126,12 +127,21 @@ namespace MidoriDesktop
             else if (e.KeyCode == Keys.Shift || e.KeyCode == Keys.ShiftKey || e.KeyCode == Keys.LShiftKey || e.KeyCode == Keys.RShiftKey) shift = true;
             else if (e.KeyValue == Settings.HotkeyImage && ctrl == Settings.HotkeyImageCtrl && alt == Settings.HotkeyImageAlt && shift == Settings.HotkeyImageShift)
             {
-                if (incapture) return;
+                e.SuppressKeyPress = true;
+                if (incapture)
+                {
+                    tmpcap.Invoke((Action)delegate
+                    {
+                        WinAPI.SetWindowPos(tmpcap.Handle, new IntPtr(-1), 0, 0, tmpcap.Width, tmpcap.Height, 0);
+                    });
+                    return;
+                }
                 Async.StartAsync(delegate
                 {
                     incapture = true;
                     Overlay overlay = new Overlay();
                     ClickCapture cap = new ClickCapture(overlay);
+                    tmpcap = cap;
                     cap.ShowDialog();
                     cap.Dispose();
                     overlay.Close();

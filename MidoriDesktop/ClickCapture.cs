@@ -116,6 +116,13 @@ namespace MidoriDesktop
             };
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            WinAPI.SetWindowPos(this.Handle, new IntPtr(-1), 0, 0, this.Width, this.Height, 0);
+
+            base.OnLoad(e);
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             //base.OnPaint(e);

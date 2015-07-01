@@ -74,6 +74,7 @@
     <Compile Include="ThreadChoke.Designer.cs">
       <DependentUpon>ThreadChoke.cs</DependentUpon>
     </Compile>
+    <Compile Include="WinAPI.cs" />
     <EmbeddedResource Include="Error.resx">
       <DependentUpon>Error.cs</DependentUpon>
     </EmbeddedResource>

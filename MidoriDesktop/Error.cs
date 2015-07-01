@@ -25,7 +25,8 @@ namespace MidoriDesktop
             "Oh the humanity!",
             "HELP, POLICE!",
             "Fire in the disco!",
-            "The jews are to blame for this!"
+            "The jews are to blame for this!",
+            "No tears now, only dreams!"
         };
 
         public Error(Exception error, bool rand = true)
