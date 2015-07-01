@@ -107,8 +107,11 @@ namespace MidoriDesktop
             }
             finally
             {
-                ico.Visible = false;
-                ico.Dispose();
+                if (ico != null)
+                {
+                    ico.Visible = false;
+                    ico.Dispose();
+                }
 
                 HookManager.KeyDown -= KeyDown;
                 HookManager.KeyUp -= KeyUp;

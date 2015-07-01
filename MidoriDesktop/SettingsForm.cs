@@ -17,6 +17,21 @@ namespace MidoriDesktop
 
             txtHotkeyImage.Text = (Settings.HotkeyImageCtrl ? "Ctrl + " : "") + (Settings.HotkeyImageAlt ? "Alt + " : "") + (Settings.HotkeyImageShift ? "Shift + " : "") + ((Keys)Settings.HotkeyImage).ToString();
             txtHotkeyVideo.Text = (Settings.HotkeyVideoCtrl ? "Ctrl + " : "") + (Settings.HotkeyVideoAlt ? "Alt + " : "") + (Settings.HotkeyVideoShift ? "Shift + " : "") + ((Keys)Settings.HotkeyVideo).ToString();
+            
+            if(Settings.PostCapture == 1) rbPostFile.Checked = true;
+            else if (Settings.PostCapture == 2) rbPostServer.Checked = true;
+            else rbPostClipboard.Checked = true;
+
+            EventHandler PostCapture = delegate
+            {
+                Settings.PostCapture = (rbPostServer.Checked ? 2 : (rbPostFile.Checked ? 1 : 0));
+
+                Settings.Save();
+            };
+
+            rbPostClipboard.CheckedChanged += PostCapture;
+            rbPostFile.CheckedChanged += PostCapture;
+            rbPostServer.CheckedChanged += PostCapture;
         }
 
         bool setimg = false, setvid = false, ctrl = false, alt = false, shift = false,
