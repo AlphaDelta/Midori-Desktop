@@ -29,11 +29,11 @@ namespace MidoriDesktop
             "No tears now, only dreams!"
         };
 
-        public Error(Exception error, bool rand = true)
+        public Error(string error, bool rand = true)
         {
             InitializeComponent();
 
-            txtError.Text = error.ToString();
+            txtError.Text = error;
 
             if (rand)
             {

@@ -41,6 +41,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.btnHotkeyImage = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.txtAPIKey = new System.Windows.Forms.TextBox();
             this.tabs.SuspendLayout();
             this.tabGeneral.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -73,12 +75,16 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.txtAPIKey);
+            this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.rbPostClipboard);
             this.groupBox1.Controls.Add(this.rbPostServer);
             this.groupBox1.Controls.Add(this.rbPostFile);
-            this.groupBox1.Location = new System.Drawing.Point(211, 6);
+            this.groupBox1.Location = new System.Drawing.Point(9, 6);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(211, 92);
+            this.groupBox1.Size = new System.Drawing.Size(413, 118);
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Post-capture";
@@ -191,6 +197,24 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Capture image:";
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(7, 91);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(47, 13);
+            this.label3.TabIndex = 3;
+            this.label3.Text = "API key:";
+            // 
+            // txtAPIKey
+            // 
+            this.txtAPIKey.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtAPIKey.Location = new System.Drawing.Point(60, 88);
+            this.txtAPIKey.Name = "txtAPIKey";
+            this.txtAPIKey.Size = new System.Drawing.Size(347, 20);
+            this.txtAPIKey.TabIndex = 4;
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -225,5 +249,7 @@
         private System.Windows.Forms.RadioButton rbPostFile;
         private System.Windows.Forms.RadioButton rbPostClipboard;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.TextBox txtAPIKey;
+        private System.Windows.Forms.Label label3;
     }
 }

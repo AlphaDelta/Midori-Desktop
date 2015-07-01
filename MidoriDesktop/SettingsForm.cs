@@ -22,6 +22,9 @@ namespace MidoriDesktop
             else if (Settings.PostCapture == 2) rbPostServer.Checked = true;
             else rbPostClipboard.Checked = true;
 
+            txtAPIKey.Text = Settings.APIKey;
+            txtAPIKey.Enabled = rbPostServer.Checked;
+
             EventHandler PostCapture = delegate
             {
                 Settings.PostCapture = (rbPostServer.Checked ? 2 : (rbPostFile.Checked ? 1 : 0));
@@ -32,6 +35,10 @@ namespace MidoriDesktop
             rbPostClipboard.CheckedChanged += PostCapture;
             rbPostFile.CheckedChanged += PostCapture;
             rbPostServer.CheckedChanged += PostCapture;
+            rbPostServer.CheckedChanged += delegate { txtAPIKey.Enabled = rbPostServer.Checked; };
+
+            txtAPIKey.TextChanged += delegate { Settings.APIKey = txtAPIKey.Text; };
+            txtAPIKey.LostFocus += delegate { Settings.Save(); };
         }
 
         bool setimg = false, setvid = false, ctrl = false, alt = false, shift = false,

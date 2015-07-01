@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
+using System.Net;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using Gma.UserActivityMonitor;
@@ -54,7 +57,7 @@ namespace MidoriDesktop
                 cm.MenuItems.Add(new MenuItem("-"));
 
                 MenuItem i2 = new MenuItem("Exit");
-                i2.Click += delegate { closing = true; };
+                i2.Click += delegate { Application.Exit(); };
                 cm.MenuItems.Add(i2);
 
                 ico.ContextMenu = cm;
@@ -67,24 +70,6 @@ namespace MidoriDesktop
                 ThreadChoke choke = new ThreadChoke();
                 STAThread = SynchronizationContext.Current;
                 choke.Dispose();
-
-                Async.StartAsync(delegate
-                {
-                    while (!closing)
-                    {
-                        if (intermediateimgflag)
-                        {
-                            STAThread.Send(delegate { Clipboard.SetImage(intermediateimg); }, null);
-                            intermediateimg.Dispose();
-                            intermediateimgflag = false;
-                        }
-
-                        Thread.Sleep(100);
-                    }
-
-                    Application.Exit();
-                    //choke.Dispose();
-                });
 
                 Application.Run();
                 /*while (!closing)
@@ -103,7 +88,7 @@ namespace MidoriDesktop
             }
             catch (Exception e)
             {
-                Error error = new Error(e);
+                Error error = new Error(e.ToString());
             }
             finally
             {
@@ -120,8 +105,6 @@ namespace MidoriDesktop
 
         static bool ctrl = false, alt = false, shift = false, incapture = false;
 
-        static Image intermediateimg = null; //For clipboard operations
-        static bool intermediateimgflag = false;
         static ClickCapture tmpcap = null;
         static void KeyDown(object sender, KeyEventArgs e)
         {
@@ -155,8 +138,57 @@ namespace MidoriDesktop
                         //MessageBox.Show(cap.X + ":" + cap.Y + ":" + cap.W + "x" + cap.H);
                         Bitmap img = new Bitmap(cap.W, cap.H);
                         using (Graphics g = Graphics.FromImage(img)) g.CopyFromScreen(cap.X, cap.Y, 0, 0, img.Size, CopyPixelOperation.SourceCopy);
-                        intermediateimg = img;
-                        intermediateimgflag = true;
+
+                        if (Settings.PostCapture == 0)
+                            STAThread.Send(delegate { Clipboard.SetImage(img); }, null);
+                        else if (Settings.PostCapture == 1)
+                        {
+                            STAThread.Send(delegate
+                            {
+                                SaveFileDialog sfd = new SaveFileDialog();
+                                sfd.Filter = "PNG Image (*.png)|*.png";
+                                if (sfd.ShowDialog() == DialogResult.OK)
+                                    img.Save(sfd.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                            }, null);
+                        }
+                        else if (Settings.PostCapture == 2)
+                        {
+                            HttpWebRequest req = (HttpWebRequest)WebRequest.Create("https://midori.moe/upload.php?apikey=" + Settings.APIKey);
+
+                            req.Method = WebRequestMethods.Http.Post;
+                            
+                            req.UserAgent = "Midori-Desktop v1.0";
+
+                            string boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x", System.Globalization.NumberFormatInfo.InvariantInfo);
+                            req.ContentType = "multipart/form-data; boundary=" + boundary;
+                            boundary = "--" + boundary;
+
+                            Stream str = req.GetRequestStream();
+
+                            StringBuilder file = new StringBuilder();
+
+                            byte[] buffer = Encoding.ASCII.GetBytes(boundary + "\r\nContent-Disposition: form-data; name=\"files[]\"; filename=\"midoridesktop.png\"\r\nContent-Type: image/png\r\n\r\n");
+                            str.Write(buffer, 0, buffer.Length);
+
+                            img.Save(str, System.Drawing.Imaging.ImageFormat.Png);
+
+                            buffer = Encoding.ASCII.GetBytes(boundary + "--");
+                            str.Write(buffer, 0, buffer.Length);
+                            str.Close();
+                            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+
+                            string response;
+                            using(Stream s = resp.GetResponseStream())
+                                using(StreamReader reader = new StreamReader(s))
+                                    response = reader.ReadToEnd();
+
+                            resp.Close();
+                            str.Dispose();
+
+                            Error error = new Error((int)resp.StatusCode + ": RESPONSE LENGTH: " + resp.ContentLength + ": RESPONSE: " + response);
+
+                        }
+                        img.Dispose();
                     }
 
                     incapture = false;

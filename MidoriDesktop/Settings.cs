@@ -18,6 +18,8 @@ namespace MidoriDesktop
 
         public static int HotkeyImage = 44, HotkeyVideo = 19, PostCapture = 0;
 
+        public static string APIKey = "";
+
         static string file;
         public static void Initialize()
         {
@@ -29,14 +31,10 @@ namespace MidoriDesktop
             {
                 FileStream stream = File.Create(file);
 
-                byte[] buffer = Encoding.ASCII.GetBytes("HotkeyImage=0:0:0:44\nHotkeyVideo=0:0:0:19\nPostCapture=0");
+                byte[] buffer = Encoding.ASCII.GetBytes("HotkeyImage=0:0:0:44\nHotkeyVideo=0:0:0:19\nPostCapture=0\nAPIKey=");
                 stream.Write(buffer, 0, buffer.Length);
                 stream.Close();
                 stream.Dispose();
-
-                HotkeyImageCtrl = HotkeyImageShift = HotkeyVideoCtrl = HotkeyVideoShift = true;
-                HotkeyImage = 67;
-                HotkeyVideo = 86;
             }
             else
             {
@@ -68,6 +66,9 @@ namespace MidoriDesktop
                         case "PostCapture":
                             PostCapture = Int32.Parse(spl[1]);
                             break;
+                        case "APIKey":
+                            APIKey = spl[1];
+                            break;
                         default:
                             throw new Exception("Unknown setting key '" + spl[0] + "'");
                     }
@@ -80,7 +81,7 @@ namespace MidoriDesktop
             FileStream stream = (File.Exists(file) ? File.OpenWrite(file) : File.Create(file));
 
             byte[] buffer = Encoding.ASCII.GetBytes(
-                String.Format("HotkeyImage={0}:{1}:{2}:{3}\nHotkeyVideo={4}:{5}:{6}:{7}\nPostCapture={8}",
+                String.Format("HotkeyImage={0}:{1}:{2}:{3}\nHotkeyVideo={4}:{5}:{6}:{7}\nPostCapture={8}\nAPIKey={9}",
                 (HotkeyImageCtrl ? 1 : 0),
                 (HotkeyImageAlt ? 1 : 0),
                 (HotkeyImageShift ? 1 : 0),
@@ -89,7 +90,8 @@ namespace MidoriDesktop
                 (HotkeyVideoAlt ? 1 : 0),
                 (HotkeyVideoShift ? 1 : 0),
                 HotkeyVideo,
-                PostCapture)
+                PostCapture,
+                APIKey)
             );
             stream.Write(buffer, 0, buffer.Length);
 
