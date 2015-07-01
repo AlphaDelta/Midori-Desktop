@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -153,40 +154,60 @@ namespace MidoriDesktop
                         }
                         else if (Settings.PostCapture == 2)
                         {
-                            HttpWebRequest req = (HttpWebRequest)WebRequest.Create("https://midori.moe/upload.php?apikey=" + Settings.APIKey);
+                            try
+                            {
+                                HttpWebRequest req = (HttpWebRequest)WebRequest.Create("https://midori.moe/upload.php?apikey=" + Settings.APIKey);
 
-                            req.Method = WebRequestMethods.Http.Post;
-                            
-                            req.UserAgent = "Midori-Desktop v1.0";
+                                req.Method = WebRequestMethods.Http.Post;
 
-                            string boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x", System.Globalization.NumberFormatInfo.InvariantInfo);
-                            req.ContentType = "multipart/form-data; boundary=" + boundary;
-                            boundary = "--" + boundary;
+                                req.UserAgent = "Midori-Desktop v1.0";
 
-                            Stream str = req.GetRequestStream();
+                                req.Expect = "";
+                                req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+                                req.Headers.Add(HttpRequestHeader.AcceptLanguage, "en-US,en;q=0.5");
+                                req.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
+                                req.Headers.Add(HttpRequestHeader.Pragma, "no-cache");
+                                req.Headers.Add(HttpRequestHeader.CacheControl, "no-cache");
 
-                            StringBuilder file = new StringBuilder();
+                                string boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x", System.Globalization.NumberFormatInfo.InvariantInfo);
+                                req.ContentType = "multipart/form-data; boundary=" + boundary;
+                                boundary = "--" + boundary;
 
-                            byte[] buffer = Encoding.ASCII.GetBytes(boundary + "\r\nContent-Disposition: form-data; name=\"files[]\"; filename=\"midoridesktop.png\"\r\nContent-Type: image/png\r\n\r\n");
-                            str.Write(buffer, 0, buffer.Length);
+                                Stream str = req.GetRequestStream();
 
-                            img.Save(str, System.Drawing.Imaging.ImageFormat.Png);
+                                StringBuilder file = new StringBuilder();
 
-                            buffer = Encoding.ASCII.GetBytes(boundary + "--");
-                            str.Write(buffer, 0, buffer.Length);
-                            str.Close();
-                            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+                                byte[] buffer = Encoding.ASCII.GetBytes(boundary + "\r\nContent-Disposition: form-data; name=\"files[]\"; filename=\"midoridesktop.png\"\r\nContent-Type: image/png\r\n\r\n");
+                                str.Write(buffer, 0, buffer.Length);
 
-                            string response;
-                            using(Stream s = resp.GetResponseStream())
-                                using(StreamReader reader = new StreamReader(s))
+                                img.Save(str, System.Drawing.Imaging.ImageFormat.Png);
+
+                                buffer = Encoding.ASCII.GetBytes("\r\n" + boundary + "--\r\n");
+                                str.Write(buffer, 0, buffer.Length);
+                                str.Close();
+                                HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+
+                                string response;
+                                using (Stream s = resp.GetResponseStream())
+                                using (GZipStream inflate = new GZipStream(s, CompressionMode.Decompress))
+                                using (StreamReader reader = new StreamReader(inflate))
                                     response = reader.ReadToEnd();
 
-                            resp.Close();
-                            str.Dispose();
+                                resp.Close();
+                                str.Dispose();
 
-                            Error error = new Error((int)resp.StatusCode + ": RESPONSE LENGTH: " + resp.ContentLength + ": RESPONSE: " + response);
-
+                                if (response.EndsWith(".png"))
+                                {
+                                    STAThread.Send(delegate {
+                                        Clipboard.SetText("https://i.midori.moe/" + response);
+                                    ico.ShowBalloonTip(3, "Info", "Link copied to clipboard", ToolTipIcon.Info);
+                                    }, null);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Error error = new Error(ex.ToString());
+                            }
                         }
                         img.Dispose();
                     }
