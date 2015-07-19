@@ -26,6 +26,23 @@ namespace MidoriDesktop
             public Point(Int32 x, Int32 y) { this.x = x; this.y = y; }
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct CURSORINFO
+        {
+            public Int32 cbSize;
+            public Int32 flags;
+            public IntPtr hCursor;
+            public Point ptScreenPos;
+        }
+
+        [DllImport("user32.dll")]
+        public static extern bool GetCursorInfo(out CURSORINFO pci);
+
+        [DllImport("user32.dll")]
+        public static extern bool DrawIcon(IntPtr hDC, int X, int Y, IntPtr hIcon);
+
+        public const Int32 CURSOR_SHOWING = 0x00000001;
+
 
         [StructLayout(LayoutKind.Sequential)]
         public struct Size

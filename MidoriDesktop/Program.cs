@@ -15,7 +15,7 @@ namespace MidoriDesktop
     static class Program
     {
         static NotifyIcon ico;
-        static SynchronizationContext STAThread;
+        public static SynchronizationContext STAThread;
         public static volatile bool closing = false;
         [STAThread]
         static void Main()
@@ -104,7 +104,8 @@ namespace MidoriDesktop
             }
         }
 
-        static bool ctrl = false, alt = false, shift = false, incapture = false;
+        static bool ctrl = false, alt = false, shift = false;
+        public static bool incapture = false;
 
         static ClickCapture tmpcap = null;
         static void KeyDown(object sender, KeyEventArgs e)
@@ -117,6 +118,7 @@ namespace MidoriDesktop
                 e.SuppressKeyPress = true;
                 if (incapture)
                 {
+                    if (!tmpcap.IsDisposed)
                     tmpcap.Invoke((Action)delegate
                     {
                         WinAPI.SetWindowPos(tmpcap.Handle, new IntPtr(-1), 0, 0, tmpcap.Width, tmpcap.Height, 0);
@@ -217,8 +219,41 @@ namespace MidoriDesktop
             }
             else if (e.KeyValue == Settings.HotkeyVideo && ctrl == Settings.HotkeyImageCtrl && alt == Settings.HotkeyImageAlt && shift == Settings.HotkeyImageShift)
             {
-                if (incapture) return;
-                ico.ShowBalloonTip(3, "Info", "Video capture invoked!", ToolTipIcon.Info);
+                e.SuppressKeyPress = true;
+                if (incapture)
+                {
+                    if(!tmpcap.IsDisposed)
+                    tmpcap.Invoke((Action)delegate
+                    {
+                        WinAPI.SetWindowPos(tmpcap.Handle, new IntPtr(-1), 0, 0, tmpcap.Width, tmpcap.Height, 0);
+                    });
+                    return;
+                }
+                Async.StartAsync(delegate
+                {
+                    incapture = true;
+                    Overlay overlay = new Overlay();
+                    ClickCapture cap = new ClickCapture(overlay);
+                    tmpcap = cap;
+                    cap.ShowDialog();
+                    cap.Dispose();
+
+                    try
+                    {
+                        VideoCapture.Initialize(overlay, new Rectangle(cap.X, cap.Y, cap.W, cap.H)); //We really dont need more clutter in here
+                    }
+                    catch (Exception ex) { new Error(ex.ToString()); }
+                    finally
+                    {
+                        if (!overlay.IsDisposed)
+                        {
+                            overlay.Close();
+                            overlay.Dispose();
+                        }
+
+                        incapture = false;
+                    }
+                });
             }
         }
         static void KeyUp(object sender, KeyEventArgs e)

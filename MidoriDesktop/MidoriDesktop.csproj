@@ -69,12 +69,14 @@
     <Compile Include="SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Temp.cs" />
     <Compile Include="ThreadChoke.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ThreadChoke.Designer.cs">
       <DependentUpon>ThreadChoke.cs</DependentUpon>
     </Compile>
+    <Compile Include="VideoCapture.cs" />
     <Compile Include="WinAPI.cs" />
     <EmbeddedResource Include="Error.resx">
       <DependentUpon>Error.cs</DependentUpon>
