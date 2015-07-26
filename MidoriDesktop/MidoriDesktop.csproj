@@ -57,6 +57,7 @@
     <Compile Include="Error.Designer.cs">
       <DependentUpon>Error.cs</DependentUpon>
     </Compile>
+    <Compile Include="Midori.cs" />
     <Compile Include="Overlay.cs">
       <SubType>Form</SubType>
     </Compile>
