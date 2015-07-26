@@ -29,28 +29,49 @@ namespace MidoriDesktop
         Color text = Color.FromArgb(0xFF, 0x33, 0x33, 0x33);
         Brush btext = new SolidBrush(Color.FromArgb(0xFF, 0x33, 0x33, 0x33));
         Pen border = new Pen(Color.FromArgb(0xFF, 0x33, 0x33, 0x33));
-        Bitmap bitmap;
-        public void SetSize(int Width, int Height) { bitmap = new Bitmap(Width, Height, PixelFormat.Format32bppArgb); }
+        Bitmap bitmap = null;
+        Graphics g = null;
+        int oldL = 0, oldR = 0, oldT = 0, oldB = 0;
+        public void SetSize(int Width, int Height)
+        {
+            bitmap = new Bitmap(Width, Height, PixelFormat.Format32bppArgb);
+            g = Graphics.FromImage(bitmap);
+            g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+        }
         new public void Update()
         {
-            //bitmap = new Bitmap(W, H, PixelFormat.Format32bppArgb);
-            using (Graphics g = Graphics.FromImage(bitmap))
+            g.FillRectangle(fill, oldL, oldB, 80, 20);
+            if (oldL == 0 && oldR == 0 && oldT == 0 && oldB == 0)
             {
-                g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
                 g.FillRectangle(fill, 0, 0, W, H);
                 g.FillRectangle(filltransparent, L, T, R - L, B - T);
-                g.DrawRectangle(border, L, T, R - L, B - T);
-
-                g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
-                //g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                string txt = (R - L) + "x" + (B - T);
-                TextRenderer.DrawText(g, txt, font, new Point(L - 1, B + 5), Color.Black);
-                TextRenderer.DrawText(g, txt, font, new Point(L + 1, B + 5), Color.Black);
-                TextRenderer.DrawText(g, txt, font, new Point(L, B + 6), Color.Black);
-                TextRenderer.DrawText(g, txt, font, new Point(L, B + 4), Color.Black);
-                TextRenderer.DrawText(g, txt, font, new Point(L, B + 5), Color.White);
             }
+            else
+            {
+                if (oldL > L) g.FillRectangle(filltransparent, L, T, (oldL - L) + 1, (B - T) + 1);
+                else if (oldL < L) g.FillRectangle(fill, oldL, T, (L - oldL) + 1, (B - T) + 1);
+                if (oldR > R) g.FillRectangle(fill, R, T, (oldR - R) + 1, (B - T) + 1);
+                else if (oldR < R) g.FillRectangle(filltransparent, oldR, T, (R - oldR) + 1, (B - T) + 1);
+
+                if (oldT > T) g.FillRectangle(filltransparent, L, T, R - L, (oldT - T) + 1);
+                else if (oldT < T) g.FillRectangle(fill, oldL, oldT, (oldR - oldL) + 1, (T - oldT) + 1);
+                if (oldB > B) g.FillRectangle(fill, oldL, B, (oldR - oldL) + 1, (oldB - B) + 1);
+                else if (oldB < B) g.FillRectangle(filltransparent, L, oldB, R - L, (B - oldB) + 1);
+            }
+            g.DrawRectangle(border, L, T, R - L, B - T);
+            
+            string txt = (R - L) + "x" + (B - T);
+            TextRenderer.DrawText(g, txt, font, new Point(L - 1, B + 5), Color.Black);
+            TextRenderer.DrawText(g, txt, font, new Point(L + 1, B + 5), Color.Black);
+            TextRenderer.DrawText(g, txt, font, new Point(L, B + 6), Color.Black);
+            TextRenderer.DrawText(g, txt, font, new Point(L, B + 4), Color.Black);
+            TextRenderer.DrawText(g, txt, font, new Point(L, B + 5), Color.White);
+
+            oldL = L;
+            oldR = R;
+            oldT = T;
+            oldB = B;
 
             IntPtr screenDc = WinAPI.GetDC(IntPtr.Zero);
             IntPtr memDc = WinAPI.CreateCompatibleDC(screenDc);
